@@ -453,6 +453,27 @@ function render() {
 }
 
 /* — Copy summary — */
+function copyText(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.position = 'fixed';
+  ta.style.top = '0';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  const selection = document.getSelection();
+  const originalRange = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+  ta.select();
+  ta.setSelectionRange(0, ta.value.length);
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+  document.body.removeChild(ta);
+  if (originalRange) { selection.removeAllRanges(); selection.addRange(originalRange); }
+  if (ok) return Promise.resolve();
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+  return Promise.reject(new Error('Copy not supported'));
+}
+
 document.getElementById('copyBtn').addEventListener('click', () => {
   const letters = state.name.split('');
   if (!letters.length) return;
@@ -461,10 +482,13 @@ document.getElementById('copyBtn').addEventListener('click', () => {
       const c = state.assignments[i] ? colourById(state.assignments[i]) : null;
       return `${ch} — ${c ? c.name : 'Not assigned'}`;
     })];
-  navigator.clipboard.writeText(lines.join('\n')).then(() => {
-    const msg = document.getElementById('copiedMsg');
+  const msg = document.getElementById('copiedMsg');
+  copyText(lines.join('\n')).then(() => {
     msg.textContent = 'Copied to clipboard!';
     setTimeout(() => msg.textContent = '', 2500);
+  }).catch(() => {
+    msg.textContent = 'Could not copy — please select and copy manually.';
+    setTimeout(() => msg.textContent = '', 3500);
   });
 });
 </script>

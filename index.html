@@ -11,37 +11,9 @@
     font-family: 'Segoe UI', system-ui, sans-serif;
     min-height: 100vh;
     padding: 40px 16px;
-    /* Cream bedroom wall – warm base with subtle gradient variation */
-    background-color: #ddc9a3;
-    background-image:
-      radial-gradient(ellipse at 20% 10%, rgba(255,248,235,0.55) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 80%, rgba(195,165,115,0.35) 0%, transparent 55%),
-      radial-gradient(ellipse at 60% 30%, rgba(255,245,225,0.30) 0%, transparent 45%);
+    background-color: #ffffff;
     position: relative;
     overflow-x: hidden;
-  }
-
-  /* Plaster / paint grain overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.18;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72 0.85' numOctaves='4' seed='8' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size: 400px 400px;
-    mix-blend-mode: multiply;
-  }
-
-  /* Subtle vignette */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background: radial-gradient(ellipse at center, transparent 55%, rgba(120,85,40,0.22) 100%);
   }
 
   /* All page content sits above the wall layers */
@@ -213,7 +185,7 @@
 
 <img src="png logo.png" alt="The Milestone Market Co" class="brand-logo"/>
 <h1>Bubble Letters</h1>
-<p class="subtitle">Type a name · choose a colour for each letter · see the exact bubble font</p>
+<p class="subtitle">Type your letters | Pick your colours | Click the Etsy link to order</p>
 
 <div class="social-row">
   <a class="social-btn instagram" href="https://instagram.com/themilestonemarket.co" target="_blank" rel="noopener">

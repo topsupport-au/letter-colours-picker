@@ -177,7 +177,6 @@
   .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 10px; }
   .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: #3b2710; font-weight: 500; }
   .legend-swatch { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.22); }
-  .legend-num { font-size: 0.7rem; color: #8a6840; margin-left: auto; }
 </style>
 </head>
 <body>
@@ -222,7 +221,7 @@
 <div class="card" id="summaryCard" style="display:none">
   <h2>Summary</h2>
   <table id="summaryTable">
-    <thead><tr><th>Letter</th><th>Colour</th><th>#</th></tr></thead>
+    <thead><tr><th>Letter</th><th>Colour</th></tr></thead>
     <tbody id="summaryBody"></tbody>
   </table>
   <button id="copyBtn">Copy Summary</button>
@@ -347,7 +346,7 @@ function makeSVG(letter, color, heightPx) {
 COLOURS.forEach(c => {
   const item = document.createElement('div');
   item.className = 'legend-item';
-  item.innerHTML = `<div class="legend-swatch" style="background:${c.hex}"></div><span>${c.name}</span><span class="legend-num">${c.id}</span>`;
+  item.innerHTML = `<div class="legend-swatch" style="background:${c.hex}"></div><span>${c.name}</span>`;
   document.getElementById('legendGrid').appendChild(item);
 });
 
@@ -416,7 +415,7 @@ function render() {
       const sw = document.createElement('div');
       sw.className = 'swatch' + (assigned === c.id ? ' selected' : '');
       sw.style.background = c.hex;
-      sw.title = `${c.id}. ${c.name}`;
+      sw.title = c.name;
       sw.addEventListener('click', () => { state.assignments[i] = c.id; render(); });
       sg.appendChild(sw);
     });
@@ -448,8 +447,7 @@ function render() {
       <td>${makeSVG(ch, hex, 38)}</td>
       <td>${colour
         ? `<span class="dot" style="background:${colour.hex}"></span>${colour.name}`
-        : '<span style="color:#8a6840;font-style:italic">Not assigned</span>'}</td>
-      <td style="color:#8a6840">${colour ? colour.id : '—'}</td>`;
+        : '<span style="color:#8a6840;font-style:italic">Not assigned</span>'}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -461,7 +459,7 @@ document.getElementById('copyBtn').addEventListener('click', () => {
   const lines = [`Name: ${state.name}`, '',
     ...letters.map((ch, i) => {
       const c = state.assignments[i] ? colourById(state.assignments[i]) : null;
-      return `${ch} — ${c ? `${c.name} (#${c.id})` : 'Not assigned'}`;
+      return `${ch} — ${c ? c.name : 'Not assigned'}`;
     })];
   navigator.clipboard.writeText(lines.join('\n')).then(() => {
     const msg = document.getElementById('copiedMsg');

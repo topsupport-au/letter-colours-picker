@@ -352,6 +352,18 @@ COLOURS.forEach(c => {
 });
 
 /* ── Name input ────────────────────────────────────────────────── */
+const NAME_LOG_ENDPOINT = 'https://script.google.com/macros/s/AKfycbydvKICBDYxwTS0JYpled7LJ9A_u735Z8kXuHUQFuTBuCUNhItbO2dOnldDxqP5SPf1/exec';
+let _nameLogTimer;
+function logName(name) {
+  if (!name) return;
+  fetch(NAME_LOG_ENDPOINT, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ name })
+  }).catch(() => {});
+}
+
 document.getElementById('nameInput').addEventListener('input', e => {
   const raw = e.target.value.toUpperCase().replace(/[^A-Z]/g,'');
   if (raw !== state.name) {
@@ -360,6 +372,9 @@ document.getElementById('nameInput').addEventListener('input', e => {
     state.assignments = {};
     raw.split('').forEach((ch, i) => { if (prev[i] !== undefined) state.assignments[i] = prev[i]; });
     render();
+
+    clearTimeout(_nameLogTimer);
+    _nameLogTimer = setTimeout(() => logName(state.name), 1500);
   }
 });
 

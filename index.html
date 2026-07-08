@@ -355,12 +355,20 @@ const NAME_LOG_ENDPOINT = 'https://script.google.com/macros/s/AKfycbydvKICBDYxwT
 let _nameLogTimer;
 function logName(name) {
   if (!name) return;
+  const colours = name.split('').map((ch, i) => {
+    const c = state.assignments[i] ? colourById(state.assignments[i]) : null;
+    return c ? c.name : '';
+  });
   fetch(NAME_LOG_ENDPOINT, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({ name })
+    body: JSON.stringify({ name, colours: colours.join(', ') })
   }).catch(() => {});
+}
+function scheduleLog() {
+  clearTimeout(_nameLogTimer);
+  _nameLogTimer = setTimeout(() => logName(state.name), 1500);
 }
 
 document.getElementById('nameInput').addEventListener('input', e => {
@@ -371,9 +379,7 @@ document.getElementById('nameInput').addEventListener('input', e => {
     state.assignments = {};
     raw.split('').forEach((ch, i) => { if (prev[i] !== undefined) state.assignments[i] = prev[i]; });
     render();
-
-    clearTimeout(_nameLogTimer);
-    _nameLogTimer = setTimeout(() => logName(state.name), 1500);
+    scheduleLog();
   }
 });
 
@@ -416,7 +422,7 @@ function render() {
       sw.className = 'swatch' + (assigned === c.id ? ' selected' : '');
       sw.style.background = c.hex;
       sw.title = c.name;
-      sw.addEventListener('click', () => { state.assignments[i] = c.id; render(); });
+      sw.addEventListener('click', () => { state.assignments[i] = c.id; render(); scheduleLog(); });
       sg.appendChild(sw);
     });
     card.appendChild(sg);

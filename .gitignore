@@ -1,6 +1,6 @@
 *
 !.gitignore
-!letter-colours.html
+!index.html
 !extract_letter_svg.py
 !extract_lowercase_svg.py
 !letter_shapes.json

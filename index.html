@@ -501,7 +501,7 @@ document.getElementById('copyBtn').addEventListener('click', () => {
   const lines = [`Name: ${state.name}`, '',
     ...letters.map((ch, i) => {
       const c = state.assignments[i] ? colourById(state.assignments[i]) : null;
-      return `${ch} — ${c ? c.name : 'Not assigned'}`;
+      return `${ch}: ${c ? c.name : 'Not assigned'}`;
     })];
   const msg = document.getElementById('copiedMsg');
   copyText(lines.join('\n')).then(() => {

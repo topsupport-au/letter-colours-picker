@@ -375,9 +375,7 @@ function scheduleLog() {
 }
 
 function toDisplayName(value) {
-  const letters = value.replace(/[^A-Za-z]/g, '');
-  if (!letters) return '';
-  return letters[0].toUpperCase() + letters.slice(1).toLowerCase();
+  return value.replace(/[^A-Za-z]/g, '');
 }
 
 document.getElementById('nameInput').addEventListener('input', e => {

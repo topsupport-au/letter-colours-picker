@@ -280,6 +280,10 @@ const COLOURS = [
   {id:17, name:'Sky Blue',      hex:'#1770a8'},
   {id:18, name:'Purple',        hex:'#665486'},
   {id:19, name:'Pink',          hex:'#ce867a'},
+  /* Metallic finishes (White Knight) -- drawn with a reflective gradient
+     instead of a flat fill */
+  {id:20, name:'Brass',         hex:'#c9a54a', metal:['#f6e4a6','#b8913a','#ecd182','#8a6a24','#d8b65e']},
+  {id:21, name:'Chrome',        hex:'#c4c8cc', metal:['#fbfcfd','#9aa1a8','#eef0f2','#6f767d','#d9dde0']},
 ];
 
 /* ── Letter shapes (extracted from alphabet_MAIN_printing.3mf) ── */
@@ -293,7 +297,7 @@ const state = { name:'', assignments:{} };
 let _uid = 0;
 
 /* ── SVG builder with specular 3D lighting ─────────────────────── */
-function makeSVG(letter, color, heightPx) {
+function makeSVG(letter, color, heightPx, metal) {
   const d = (letter >= 'a' && letter <= 'z') ? LOWER_LETTER_SHAPES[letter] : LETTER_SHAPES[letter];
   if (!d) {
     return `<svg viewBox="0 0 70 100" height="${heightPx}"><text x="35" y="80" text-anchor="middle" font-size="85" font-weight="900" fill="${color}">${letter}</text></svg>`;
@@ -302,8 +306,13 @@ function makeSVG(letter, color, heightPx) {
   const fid = `f${++_uid}`;
   const pathEls = d.paths.map(p => `<path d="${p}"/>`).join('');
 
+  /* Metallic finishes get banded light/dark reflections instead of a flat fill */
+  const metalGrad = metal ? `<linearGradient id="${fid}g" x1="0" y1="0" x2="0.35" y2="1">${metal.map((c, i) => `<stop offset="${i / (metal.length - 1)}" stop-color="${c}"/>`).join('')}</linearGradient>` : '';
+  const fill = metal ? `url(#${fid}g)` : color;
+
   return `<svg viewBox="0 0 ${d.vw} ${d.vh}" height="${heightPx}" style="overflow:visible" xmlns="http://www.w3.org/2000/svg">
   <defs>
+    ${metalGrad}
     <!-- Gloss spray-paint dome effect -->
     <filter id="${fid}" x="-12%" y="-12%" width="124%" height="135%" color-interpolation-filters="sRGB">
       <!-- Height map from alpha -->
@@ -340,16 +349,18 @@ function makeSVG(letter, color, heightPx) {
       <feComposite in="dark" in2="edge" operator="in"/>
     </filter>
   </defs>
-  <g fill="${color}" fill-rule="evenodd" filter="url(#${fid})">${pathEls}</g>
+  <g fill="${fill}" fill-rule="evenodd" filter="url(#${fid})">${pathEls}</g>
   <g fill="rgba(0,0,0,0.15)" fill-rule="evenodd" filter="url(#${fid}e)">${pathEls}</g>
 </svg>`;
 }
+
+function swatchBg(c) { return c.metal ? `linear-gradient(135deg, ${c.metal.join(', ')})` : c.hex; }
 
 /* ── Legend ────────────────────────────────────────────────────── */
 COLOURS.forEach(c => {
   const item = document.createElement('div');
   item.className = 'legend-item';
-  item.innerHTML = `<div class="legend-swatch" style="background:${c.hex}"></div><span>${c.name}</span>`;
+  item.innerHTML = `<div class="legend-swatch" style="background:${swatchBg(c)}"></div><span>${c.name}</span>`;
   document.getElementById('legendGrid').appendChild(item);
 });
 
@@ -422,7 +433,7 @@ function render() {
 
     const wrap = document.createElement('div');
     wrap.className = 'letter-svg-wrap';
-    wrap.innerHTML = makeSVG(ch, hex, 84);
+    wrap.innerHTML = makeSVG(ch, hex, 84, colour && colour.metal);
     card.appendChild(wrap);
 
     const label = document.createElement('div');
@@ -435,7 +446,7 @@ function render() {
     COLOURS.forEach(c => {
       const sw = document.createElement('div');
       sw.className = 'swatch' + (assigned === c.id ? ' selected' : '');
-      sw.style.background = c.hex;
+      sw.style.background = swatchBg(c);
       sw.title = c.name;
       sw.addEventListener('click', () => { state.assignments[i] = c.id; render(); scheduleLog(); });
       sg.appendChild(sw);
@@ -452,7 +463,7 @@ function render() {
     const hex    = colour ? colour.hex : '#b8a898';
     const wrap   = document.createElement('div');
     wrap.className = 'preview-svg-wrap';
-    wrap.innerHTML = makeSVG(ch, hex, 110);
+    wrap.innerHTML = makeSVG(ch, hex, 110, colour && colour.metal);
     preview.appendChild(wrap);
   });
 
@@ -465,9 +476,9 @@ function render() {
     const hex      = colour ? colour.hex : '#b8a898';
     const tr       = document.createElement('tr');
     tr.innerHTML = `
-      <td>${makeSVG(ch, hex, 38)}</td>
+      <td>${makeSVG(ch, hex, 38, colour && colour.metal)}</td>
       <td>${colour
-        ? `<span class="dot" style="background:${colour.hex}"></span>${colour.name}`
+        ? `<span class="dot" style="background:${swatchBg(colour)}"></span>${colour.name}`
         : '<span style="color:#8a6840;font-style:italic">Not assigned</span>'}</td>`;
     tbody.appendChild(tr);
   });

@@ -9,3 +9,6 @@
 !letter_shapes.json
 !lowercase_letter_shapes.json
 !png logo.png
+!balloons.html
+!extract_balloon_shape.py
+!balloon_shape.json

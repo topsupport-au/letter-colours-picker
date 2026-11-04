@@ -193,26 +193,32 @@ def silhouette(mask, norm_px):
     return paths
 
 
-result = {}
-zips = {}
-for name, file, oid in ICONS:
-    z = zips.setdefault(file, zipfile.ZipFile(os.path.join(HERE, file)))
-    verts, tris = icon_mesh(z, oid)
+def shape_entry(verts, tris):
+    """icon_shapes.json entry (viewBox, silhouette paths, lighting overlay) for a mesh."""
     h, mask, mm, x0, y1 = height_map(verts, tris)
     w_mm = verts[:, 0].max() - verts[:, 0].min()
     h_mm = verts[:, 1].max() - verts[:, 1].min()
     norm_px = 100.0 / (max(w_mm, h_mm) / mm)       # pixels -> normalised units
     H, W = mask.shape
-    result[name] = {
+    return {
         'vw': round(w_mm / mm * norm_px, 2),
         'vh': round(h_mm / mm * norm_px, 2),
         'paths': silhouette(mask, norm_px),
         'img': {'x': round(-MARGIN * norm_px, 2), 'y': round(-MARGIN * norm_px, 2),
                 'w': round(W * norm_px, 2), 'h': round(H * norm_px, 2), 'src': overlay(h, mask, mm)},
     }
-    r = result[name]
-    print(f"  {name}: {len(r['paths'])} path(s)  viewBox 0 0 {r['vw']} {r['vh']}  overlay {len(r['img']['src']) // 1024} KB", flush=True)
 
-with open(OUT, 'w') as f:
-    json.dump(result, f, separators=(',', ':'))
-print(f"\nDone -- {OUT}  ({os.path.getsize(OUT) // 1024} KB, {len(result)} icons)")
+
+if __name__ == '__main__':
+    result = {}
+    zips = {}
+    for name, file, oid in ICONS:
+        z = zips.setdefault(file, zipfile.ZipFile(os.path.join(HERE, file)))
+        verts, tris = icon_mesh(z, oid)
+        result[name] = shape_entry(verts, tris)
+        r = result[name]
+        print(f"  {name}: {len(r['paths'])} path(s)  viewBox 0 0 {r['vw']} {r['vh']}  overlay {len(r['img']['src']) // 1024} KB", flush=True)
+
+    with open(OUT, 'w') as f:
+        json.dump(result, f, separators=(',', ':'))
+    print(f"\nDone -- {OUT}  ({os.path.getsize(OUT) // 1024} KB, {len(result)} icons)")

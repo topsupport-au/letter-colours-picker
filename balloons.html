@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bubble Balloons</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 40px 16px;
+    background-color: #FAEFE2;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  #app { position: relative; z-index: 1; }
+
+  .brand-logo {
+    display: block;
+    margin: 0 auto 10px;
+    max-width: 260px;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Social buttons */
+  .social-row {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .social-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 18px; border-radius: 999px;
+    font-size: 0.85rem; font-weight: 700; text-decoration: none;
+    color: #fff; box-shadow: 0 2px 8px rgba(80,50,20,0.18);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .social-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(80,50,20,0.24); }
+  .social-btn.instagram { background: linear-gradient(45deg,#f9ce34,#ee2a7b,#6228d7); }
+  .social-btn.etsy { background: #f1641e; }
+  .social-btn.tiktok { background: #010101; }
+  .social-btn.shop { background: #b07830; }
+  .social-btn svg { width: 16px; height: 16px; fill: #fff; flex-shrink: 0; }
+
+  .widget-frame {
+    border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(210,185,140,0.5);
+    min-height: 80px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(220,200,165,0.25);
+    color: #8a6840; font-size: 0.85rem; text-align: center; padding: 20px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #3b2710;
+    margin-bottom: 6px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 3px rgba(255,245,220,0.6);
+  }
+  .subtitle {
+    text-align: center;
+    color: #6b4e2a;
+    margin-bottom: 32px;
+    font-size: 0.92rem;
+  }
+
+  .card {
+    background: rgba(255,252,244,0.88);
+    backdrop-filter: blur(2px);
+    border-radius: 18px;
+    padding: 26px 28px;
+    max-width: 980px;
+    margin: 0 auto 26px;
+    box-shadow: 0 4px 24px rgba(80,50,20,0.14), 0 1px 4px rgba(0,0,0,0.08);
+    border: 1px solid rgba(210,185,140,0.4);
+  }
+  .card h2 {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #7a5c38;
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+
+  /* Product and size choices */
+  .choice-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 12px; }
+  .choice {
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(255,250,240,0.7);
+    border: 2px solid rgba(210,185,140,0.5);
+    border-radius: 14px; padding: 14px 16px;
+    font: inherit; color: #3b2710; text-align: left;
+    cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  }
+  .choice:hover { border-color: #b07830; box-shadow: 0 4px 14px rgba(176,120,48,0.18); transform: translateY(-1px); }
+  .choice.selected { border-color: #3b2710; background: #fff8ec; }
+  .choice-art { width: 54px; height: 54px; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: center; gap: 1px; }
+  .choice-art svg { overflow: visible; }
+  .choice-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: #7a5c38; }
+  .choice-sub { font-size: 0.86rem; margin-top: 3px; color: #3b2710; font-weight: 500; }
+
+  /* Balloon cards */
+  #balloonGrid { display: flex; flex-wrap: wrap; gap: 16px; }
+  .balloon-card {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    background: rgba(255,250,240,0.7);
+    border: 2px solid rgba(210,185,140,0.5);
+    border-radius: 16px; padding: 16px 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 140px;
+  }
+  .balloon-card:hover { border-color: #b07830; box-shadow: 0 4px 14px rgba(176,120,48,0.18); }
+  .balloon-svg-wrap { height: 110px; display: flex; align-items: flex-end; justify-content: center; }
+  .balloon-svg-wrap svg { overflow: visible; }
+  .balloon-label {
+    font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.07em;
+    color: #7a5c38; font-weight: 700; text-align: center;
+    min-height: 2.4em; line-height: 1.25;
+  }
+  .balloon-label span { font-weight: 500; }
+  .same-btn {
+    font: inherit; font-size: 0.72rem; font-weight: 700; color: #7a5c38;
+    background: none; border: none; text-decoration: underline; cursor: pointer; margin-top: 12px;
+  }
+  .same-btn:hover { color: #3b2710; }
+
+  /* Colour swatches */
+  .swatch-grid { display: grid; grid-template-columns: repeat(7, 22px); gap: 4px; }
+  .swatch {
+    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: transform 0.15s, border-color 0.15s;
+  }
+  .swatch:hover { transform: scale(1.2); }
+  .swatch.selected { border-color: #3b2710; transform: scale(1.18); }
+
+  /* Preview: balloons on a wall, the set of 3 staggered like the product photos */
+  #preview {
+    position: relative;
+    display: flex; gap: 18px; align-items: flex-start; justify-content: center;
+    padding: 34px 20px 26px;
+    background: linear-gradient(#f6efe6, #efe5d8);
+    border-radius: 14px; min-height: 260px;
+  }
+  .preview-balloon svg { overflow: visible; display: block; }
+  .preview-balloon:nth-child(2) { margin-top: 70px; }
+  .preview-balloon:nth-child(3) { margin-top: 26px; }
+  .preview-scale { text-align: center; color: #8a6840; font-size: 0.78rem; margin-top: 10px; }
+
+  /* Summary */
+  #summaryTable { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  #summaryTable th {
+    text-align: left; padding: 8px 14px;
+    background: rgba(220,200,160,0.3); color: #7a5c38;
+    font-size: 0.73rem; text-transform: uppercase; letter-spacing: 0.09em;
+    border-bottom: 2px solid rgba(210,185,140,0.5);
+  }
+  #summaryTable td { padding: 10px 14px; border-bottom: 1px solid rgba(210,185,140,0.3); color: #3b2710; font-weight: 500; vertical-align: middle; }
+  #summaryTable tfoot td { font-weight: 700; border-bottom: none; }
+  .summary-balloon { display: inline-flex; height: 38px; align-items: flex-end; vertical-align: middle; margin-right: 12px; }
+  .summary-balloon svg { overflow: visible; }
+  .dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; margin-right: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.22); }
+
+  .action-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+  .action-btn {
+    display: inline-block; padding: 10px 28px;
+    background: #b07830; color: #fff; border: none; border-radius: 9px;
+    font: inherit; font-size: 0.92rem; font-weight: 700; cursor: pointer; text-decoration: none;
+    letter-spacing: 0.05em; transition: background 0.2s;
+  }
+  .action-btn:hover { background: #8c5e22; }
+  .copied-msg { text-align: center; color: #5C8C20; font-size: 0.85rem; margin-top: 8px; min-height: 1.2em; font-weight: 700; }
+  .note { color: #8a6840; font-size: 0.8rem; margin-top: 12px; text-align: center; }
+
+  /* Legend */
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: #3b2710; font-weight: 500; }
+  .legend-swatch { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.22); }
+</style>
+</head>
+<body>
+<div id="app">
+
+<img src="png logo.png" alt="The Milestone Market Co" class="brand-logo"/>
+<h1>Bubble Balloons</h1>
+<p class="subtitle">Pick single or a set of 3 | Pick your size | Pick your colours | Click the shop link to order</p>
+
+<div class="social-row">
+  <a class="social-btn instagram" href="https://instagram.com/themilestonemarket.co" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24"><path d="M12 2c2.72 0 3.06.01 4.12.06 1.06.05 1.79.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.64.42 1.37.47 2.43.05 1.06.06 1.4.06 4.12s-.01 3.06-.06 4.12c-.05 1.06-.22 1.79-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.64.25-1.37.42-2.43.47-1.06.05-1.4.06-4.12.06s-3.06-.01-4.12-.06c-1.06-.05-1.79-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.64-.42-1.37-.47-2.43C2.01 15.06 2 14.72 2 12s.01-3.06.06-4.12c.05-1.06.22-1.79.47-2.43.26-.66.6-1.22 1.15-1.77A4.9 4.9 0 0 1 5.45.53C6.09.28 6.82.11 7.88.06 8.94.01 9.28 0 12 0zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4zm5.2-8.4a1.17 1.17 0 1 1 0-2.34 1.17 1.17 0 0 1 0 2.34z"/></svg>
+    Follow on Instagram
+  </a>
+  <a class="social-btn shop" href="https://themilestonemarket.co/products/bubble-balloon-single" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24"><path d="M7 7V6a5 5 0 0 1 10 0v1h3l-1 15H5L4 7h3zm2 0h6V6a3 3 0 0 0-6 0v1z"/></svg>
+    Shop Single Balloon
+  </a>
+  <a class="social-btn shop" href="https://themilestonemarket.co/products/bubble-balloon-set-of-3" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24"><path d="M7 7V6a5 5 0 0 1 10 0v1h3l-1 15H5L4 7h3zm2 0h6V6a3 3 0 0 0-6 0v1z"/></svg>
+    Shop Set of 3
+  </a>
+  <a class="social-btn tiktok" href="https://www.tiktok.com/@themilestonemarket.co" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24"><path d="M16.6 5.82c-.9-.98-1.4-2.26-1.4-3.57h-3.15v13.66c0 1.64-1.33 2.98-2.97 2.98a2.98 2.98 0 0 1-2.97-2.98 2.98 2.98 0 0 1 2.97-2.98c.28 0 .55.04.8.11V9.9a6.16 6.16 0 0 0-.8-.05A6.13 6.13 0 0 0 3 15.98 6.13 6.13 0 0 0 9.08 22a6.13 6.13 0 0 0 6.08-6.02V9.15a9.29 9.29 0 0 0 5.43 1.74V7.75c-1.44 0-2.77-.46-3.99-1.93z"/></svg>
+    Follow on TikTok
+  </a>
+</div>
+
+<div class="card">
+  <h2>Choose Your Balloons</h2>
+  <div class="choice-row" id="productRow"></div>
+</div>
+
+<div class="card">
+  <h2>Size</h2>
+  <div class="choice-row" id="sizeRow"></div>
+</div>
+
+<div class="card">
+  <h2 id="colourHeading">Balloon Colour</h2>
+  <div id="balloonGrid"></div>
+  <div id="sameRow"></div>
+</div>
+
+<div class="card">
+  <h2>Preview</h2>
+  <div id="preview"></div>
+  <p class="preview-scale" id="previewScale"></p>
+</div>
+
+<div class="card">
+  <h2>Summary</h2>
+  <table id="summaryTable">
+    <thead><tr><th>Balloon</th><th>Colour</th></tr></thead>
+    <tbody id="summaryBody"></tbody>
+    <tfoot><tr><td id="summaryProduct"></td><td id="summaryPrice"></td></tr></tfoot>
+  </table>
+  <div class="action-row">
+    <button class="action-btn" id="copyBtn" type="button">Copy Summary</button>
+    <a class="action-btn" id="shopBtn" href="#" target="_blank" rel="noopener">Shop This</a>
+  </div>
+  <p class="copied-msg" id="copiedMsg"></p>
+  <p class="note">Brass and Chrome balloons have a matte finish.</p>
+</div>
+
+<div class="card">
+  <h2>Available Colours</h2>
+  <div class="legend-grid" id="legendGrid"></div>
+</div>
+
+<div class="card">
+  <h2>Follow &amp; Shop</h2>
+  <div class="social-row" style="margin-bottom:16px">
+    <a class="social-btn instagram" href="https://instagram.com/themilestonemarket.co" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M12 2c2.72 0 3.06.01 4.12.06 1.06.05 1.79.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.64.42 1.37.47 2.43.05 1.06.06 1.4.06 4.12s-.01 3.06-.06 4.12c-.05 1.06-.22 1.79-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.64.25-1.37.42-2.43.47-1.06.05-1.4.06-4.12.06s-3.06-.01-4.12-.06c-1.06-.05-1.79-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.64-.42-1.37-.47-2.43C2.01 15.06 2 14.72 2 12s.01-3.06.06-4.12c.05-1.06.22-1.79.47-2.43.26-.66.6-1.22 1.15-1.77A4.9 4.9 0 0 1 5.45.53C6.09.28 6.82.11 7.88.06 8.94.01 9.28 0 12 0zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4zm5.2-8.4a1.17 1.17 0 1 1 0-2.34 1.17 1.17 0 0 1 0 2.34z"/></svg>
+      @themilestonemarket.co
+    </a>
+    <a class="social-btn etsy" href="https://www.etsy.com/au/listing/4497093699/personalised-3d-bubble-letters-name-hand" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M4 3h13.5l.7 4.2h-1.1c-.6-2-1.1-2.6-3.1-2.6H9.8v6.1h2.5c1.4 0 1.8-.6 2.1-2h1.1v5.6h-1.1c-.3-1.4-.7-2-2.1-2H9.8v5c0 1.3.4 1.8 2.4 1.8h1.9c2.2 0 2.8-.7 3.8-3.1h1L18.4 21H4v-1.1c1.9-.1 2.1-.3 2.1-1.8V5.9c0-1.5-.2-1.7-2.1-1.8V3z"/></svg>
+      The Milestone Market Co
+    </a>
+    <a class="social-btn tiktok" href="https://www.tiktok.com/@themilestonemarket.co" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M16.6 5.82c-.9-.98-1.4-2.26-1.4-3.57h-3.15v13.66c0 1.64-1.33 2.98-2.97 2.98a2.98 2.98 0 0 1-2.97-2.98 2.98 2.98 0 0 1 2.97-2.98c.28 0 .55.04.8.11V9.9a6.16 6.16 0 0 0-.8-.05A6.13 6.13 0 0 0 3 15.98 6.13 6.13 0 0 0 9.08 22a6.13 6.13 0 0 0 6.08-6.02V9.15a9.29 9.29 0 0 0 5.43 1.74V7.75c-1.44 0-2.77-.46-3.99-1.93z"/></svg>
+      @themilestonemarket.co
+    </a>
+  </div>
+  <div class="widget-frame">
+    <a href="https://instagram.com/themilestonemarket.co" target="_blank" rel="noopener" style="color:#7a5c38;font-weight:700;text-decoration:none">
+      📷 See our latest posts on Instagram →
+    </a>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+/* ── Colour palette (the products' Color option names) ─────────── */
+const COLOURS = [
+  {id:1,  name:'Wine Red',      hex:'#663040'},
+  {id:2,  name:'Pastel Pink',   hex:'#ecbecb'},
+  {id:3,  name:'Dust Pink',     hex:'#d0bbaa'},
+  {id:4,  name:'Pastel Terra',  hex:'#ebbaa9'},
+  {id:5,  name:'Pastel Blue',   hex:'#d4e1e9'},
+  {id:6,  name:'Ocean Blue',    hex:'#466d94'},
+  {id:7,  name:'Cream',         hex:'#f2d5ad'},
+  {id:8,  name:'Pastel Lilac',  hex:'#d9cede'},
+  {id:9,  name:'Sage Green',    hex:'#bcc1bb'},
+  {id:10, name:'Chocolate',     hex:'#63564d'},
+  {id:11, name:'Caramel',       hex:'#b16d4a'},
+  {id:12, name:'Forest Green',  hex:'#274e33'},
+  {id:13, name:'Red',           hex:'#af1b31'},
+  {id:14, name:'Orange',        hex:'#ce5f0e'},
+  {id:15, name:'Bright Yellow', hex:'#fdce5a'},
+  {id:16, name:'Green',         hex:'#7f9540'},
+  {id:17, name:'Sky Blue',      hex:'#1770a8'},
+  {id:18, name:'Purple',        hex:'#665486'},
+  {id:19, name:'Pink',          hex:'#ce867a'},
+  /* Metallic finishes -- matte on the balloons, so the reflective gradient is kept soft */
+  {id:20, name:'Brass',         hex:'#c4a356', metal:['#dcc68e','#bf9d4f','#d2b874','#a98945','#c9ab62']},
+  {id:21, name:'Chrome',        hex:'#c4c8cc', metal:['#eceef0','#a4abb2','#dfe2e5','#858c93','#cfd3d7']},
+];
+
+/* ── Products (prices from the Shopify products) ───────────────── */
+const PRODUCTS = [
+  {key:'single', title:'Single Balloon', count:1, url:'https://themilestonemarket.co/products/bubble-balloon-single',
+   price:{SMALL:40, LARGE:60}},
+  {key:'set',    title:'Set of 3',       count:3, url:'https://themilestonemarket.co/products/bubble-balloon-set-of-3',
+   price:{SMALL:90, LARGE:135}},
+];
+const SIZES = [
+  {key:'SMALL', title:'Small', dims:'10cm long, 6.5cm wide, 5cm deep', cm:10},
+  {key:'LARGE', title:'Large', dims:'14cm long, 9.5cm wide, 7cm deep', cm:14},
+];
+
+/* ── Balloon shape + lighting (extract_balloon_shape.py, from sphere_balloon.3mf) ── */
+const BALLOON_SHAPE = {"vw":68.18,"vh":100.0,"paths":["M37.28,100.14L31.58,100.22L30.15,99.56L30.26,98.94L32.16,97.37L32.16,94.74L31.37,92.98L31.72,91.67L23.05,85.96L16.89,80.26L12.13,74.56L8.19,68.86L5.55,64.04L4.24,61.4L1.61,53.51L0.22,45.61L0.22,32.89L1.61,25.88L4.24,18.86L6.87,14.47L11.4,8.99L17.11,4.68L23.68,1.61L29.39,0.22L39.04,0.22L43.42,1.17L48.25,2.93L55.46,7.46L59.65,11.65L64.18,18.42L67.25,26.75L68.64,35.09L68.64,43.42L67.25,52.19L64.18,61.84L58.48,71.93L52.85,78.95L44.3,86.99L36.7,91.67L37.42,92.98L36.7,94.3L36.7,97.37L38.3,99.12L37.5,100.0Z"],"img":{"x":-2.63,"y":-2.63,"w":74.12,"h":105.7,"src":"data:image/webp;base64,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"}};
+
+/* ── State ─────────────────────────────────────────────────────── */
+const state = { product:'single', size:'SMALL', colours:[null, null, null] };
+let _uid = 0;
+
+/* ── SVG builder: flat colour + baked lighting overlay + twine string ── */
+/* The string hangs from the knot (bottom centre of the shape) with a small bow, like the photos. */
+const TWINE = '#b4946a';
+function makeBalloonSVG(color, heightPx, metal, sway) {
+  const d = BALLOON_SHAPE;
+  const fid = `b${++_uid}`;
+  const pathEls = d.paths.map(p => `<path d="${p}"/>`).join('');
+  const metalGrad = metal ? `<linearGradient id="${fid}g" x1="0" y1="0" x2="0.35" y2="1">${metal.map((c, i) => `<stop offset="${i / (metal.length - 1)}" stop-color="${c}"/>`).join('')}</linearGradient>` : '';
+  const fill = metal ? `url(#${fid}g)` : color;
+  const s = Math.max(d.vw, d.vh);
+  const kx = d.vw / 2, ky = d.vh - 0.5;
+  const str = 34;                       /* string length below the balloon, in shape units */
+  const w = sway || 1;
+  const twine = `<g fill="none" stroke="${TWINE}" stroke-width="0.9" stroke-linecap="round">
+      <path d="M${kx},${ky} C${kx + 7 * w},${ky + str * 0.35} ${kx - 6 * w},${ky + str * 0.65} ${kx + 3 * w},${ky + str}"/>
+      <path d="M${kx},${ky} C${kx - 6},${ky - 3} ${kx - 12},${ky + 2} ${kx - 9},${ky + 4} C${kx - 6},${ky + 5} ${kx - 3},${ky + 2} ${kx},${ky}"/>
+      <path d="M${kx},${ky} C${kx + 6},${ky - 3} ${kx + 12},${ky + 2} ${kx + 9},${ky + 4} C${kx + 6},${ky + 5} ${kx + 3},${ky + 2} ${kx},${ky}"/>
+      <path d="M${kx},${ky} L${kx - 7},${ky + 10}"/>
+      <path d="M${kx},${ky} L${kx + 8},${ky + 9}"/>
+    </g>`;
+  const vh = d.vh + str + 1;
+  return `<svg viewBox="0 0 ${d.vw} ${vh}" height="${heightPx * vh / d.vh}" style="overflow:visible" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    ${metalGrad}
+    <filter id="${fid}" x="-15%" y="-12%" width="130%" height="135%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="${s*0.03}" dy="${s*0.045}" stdDeviation="${s*0.035}" flood-color="rgba(20,10,0,0.45)" flood-opacity="1"/>
+    </filter>
+  </defs>
+  ${twine}
+  <g fill="${fill}" fill-rule="evenodd" filter="url(#${fid})">${pathEls}</g>
+  <image href="${d.img.src}" x="${d.img.x}" y="${d.img.y}" width="${d.img.w}" height="${d.img.h}" preserveAspectRatio="none"/>
+</svg>`;
+}
+
+function swatchBg(c) { return c.metal ? `linear-gradient(135deg, ${c.metal.join(', ')})` : c.hex; }
+function colourById(id) { return COLOURS.find(c => c.id === id) || null; }
+function product() { return PRODUCTS.find(p => p.key === state.product); }
+function size() { return SIZES.find(s => s.key === state.size); }
+const UNSET = '#cdbfae';
+const SWAYS = [1, -0.8, 0.6];
+
+/* ── Legend ────────────────────────────────────────────────────── */
+COLOURS.forEach(c => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  item.innerHTML = `<div class="legend-swatch" style="background:${swatchBg(c)}"></div><span>${c.name}</span>`;
+  document.getElementById('legendGrid').appendChild(item);
+});
+
+/* ── Render ────────────────────────────────────────────────────── */
+function render() {
+  const p = product(), sz = size();
+  const n = p.count;
+
+  /* — Product choice — */
+  const productRow = document.getElementById('productRow');
+  productRow.innerHTML = '';
+  PRODUCTS.forEach(pr => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'choice' + (pr.key === state.product ? ' selected' : '');
+    const art = Array.from({length: pr.count}, (_, i) => makeBalloonSVG(['#ecbecb', '#f2d5ad', '#663040'][pr.count === 1 ? 1 : i], pr.count === 1 ? 40 : 28, null, SWAYS[i])).join('');
+    btn.innerHTML = `<div class="choice-art">${art}</div>
+      <div><div class="choice-title">${pr.title}</div><div class="choice-sub">$${pr.price.SMALL} small · $${pr.price.LARGE} large</div></div>`;
+    btn.addEventListener('click', () => { state.product = pr.key; render(); });
+    productRow.appendChild(btn);
+  });
+
+  /* — Size choice — */
+  const sizeRow = document.getElementById('sizeRow');
+  sizeRow.innerHTML = '';
+  SIZES.forEach(s => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'choice' + (s.key === state.size ? ' selected' : '');
+    btn.innerHTML = `<div class="choice-art">${makeBalloonSVG('#e6d3b3', s.cm * 3, null)}</div>
+      <div><div class="choice-title">${s.title} · $${p.price[s.key]}</div><div class="choice-sub">${s.dims}</div></div>`;
+    btn.addEventListener('click', () => { state.size = s.key; render(); });
+    sizeRow.appendChild(btn);
+  });
+
+  /* — Colour cards, one per balloon — */
+  document.getElementById('colourHeading').textContent = n === 1 ? 'Balloon Colour' : 'Balloon Colours';
+  const grid = document.getElementById('balloonGrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const colour = state.colours[i] ? colourById(state.colours[i]) : null;
+    const card = document.createElement('div');
+    card.className = 'balloon-card';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'balloon-svg-wrap';
+    wrap.innerHTML = makeBalloonSVG(colour ? colour.hex : UNSET, 78, colour && colour.metal, SWAYS[i]);
+    card.appendChild(wrap);
+
+    const label = document.createElement('div');
+    label.className = 'balloon-label';
+    label.innerHTML = `${n === 1 ? 'Balloon' : 'Balloon ' + (i + 1)}<br><span>${colour ? colour.name : 'Pick a colour'}</span>`;
+    card.appendChild(label);
+
+    const sg = document.createElement('div');
+    sg.className = 'swatch-grid';
+    COLOURS.forEach(c => {
+      const sw = document.createElement('div');
+      sw.className = 'swatch' + (state.colours[i] === c.id ? ' selected' : '');
+      sw.style.background = swatchBg(c);
+      sw.title = c.name;
+      sw.addEventListener('click', () => { state.colours[i] = c.id; render(); });
+      sg.appendChild(sw);
+    });
+    card.appendChild(sg);
+    grid.appendChild(card);
+  }
+
+  /* — "Same colour for all" for the set — */
+  const sameRow = document.getElementById('sameRow');
+  sameRow.innerHTML = '';
+  if (n > 1 && state.colours[0]) {
+    const same = document.createElement('button');
+    same.type = 'button';
+    same.className = 'same-btn';
+    same.textContent = `Make all 3 ${colourById(state.colours[0]).name}`;
+    same.addEventListener('click', () => { state.colours = [state.colours[0], state.colours[0], state.colours[0]]; render(); });
+    sameRow.appendChild(same);
+  }
+
+  /* — Preview: true relative size (small 10cm, large 14cm) — */
+  const preview = document.getElementById('preview');
+  preview.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const colour = state.colours[i] ? colourById(state.colours[i]) : null;
+    const wrap = document.createElement('div');
+    wrap.className = 'preview-balloon';
+    wrap.innerHTML = makeBalloonSVG(colour ? colour.hex : UNSET, sz.cm * 14, colour && colour.metal, SWAYS[i]);
+    preview.appendChild(wrap);
+  }
+  document.getElementById('previewScale').textContent = `${sz.title}: ${sz.dims}`;
+
+  /* — Summary — */
+  const tbody = document.getElementById('summaryBody');
+  tbody.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const colour = state.colours[i] ? colourById(state.colours[i]) : null;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="summary-balloon">${makeBalloonSVG(colour ? colour.hex : UNSET, 28, colour && colour.metal)}</span>${n === 1 ? 'Balloon' : 'Balloon ' + (i + 1)}</td>
+      <td>${colour
+        ? `<span class="dot" style="background:${swatchBg(colour)}"></span>${colour.name}`
+        : '<span style="color:#8a6840;font-style:italic">Not assigned</span>'}</td>`;
+    tbody.appendChild(tr);
+  }
+  document.getElementById('summaryProduct').textContent = `${p.title}, ${sz.title}`;
+  document.getElementById('summaryPrice').textContent = `$${p.price[sz.key]}.00`;
+  document.getElementById('shopBtn').href = p.url;
+  document.getElementById('shopBtn').textContent = `Shop ${p.title}`;
+}
+
+/* — Copy summary — */
+function copyText(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.position = 'fixed';
+  ta.style.top = '0';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  const selection = document.getSelection();
+  const originalRange = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+  ta.select();
+  ta.setSelectionRange(0, ta.value.length);
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+  document.body.removeChild(ta);
+  if (originalRange) { selection.removeAllRanges(); selection.addRange(originalRange); }
+  if (ok) return Promise.resolve();
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+  return Promise.reject(new Error('Copy not supported'));
+}
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const p = product(), sz = size();
+  const lines = [`Bubble Balloons - ${p.title}`, `Size: ${sz.title} ($${p.price[sz.key]})`, ''];
+  for (let i = 0; i < p.count; i++) {
+    const c = state.colours[i] ? colourById(state.colours[i]) : null;
+    lines.push(`${p.count === 1 ? 'Balloon' : 'Balloon ' + (i + 1)}: ${c ? c.name : 'Not assigned'}`);
+  }
+  const msg = document.getElementById('copiedMsg');
+  copyText(lines.join('\n')).then(() => {
+    msg.textContent = 'Copied to clipboard!';
+    setTimeout(() => msg.textContent = '', 2500);
+  }).catch(() => {
+    msg.textContent = 'Could not copy — please select and copy manually.';
+    setTimeout(() => msg.textContent = '', 3500);
+  });
+});
+
+render();
+</script>
+</body>
+</html>

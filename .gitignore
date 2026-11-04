@@ -1,6 +1,9 @@
 *
 !.gitignore
 !index.html
+!icons.html
+!extract_icon_shapes.py
+!icon_shapes.json
 !extract_letter_svg.py
 !extract_lowercase_svg.py
 !letter_shapes.json

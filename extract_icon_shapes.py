@@ -1,7 +1,7 @@
 """
 extract_icon_shapes.py
-Builds icon_shapes.json for icons.html from the three icon 3mf files
-("icons shapes.3mf", "icons princess.3mf", "icons ocean.3mf").
+Builds icon_shapes.json for icons.html from the icon 3mf files
+("icons shapes.3mf", "icon ThePrincessSet.3mf", "icon Ocean.3mf", "icon Golf.3mf").
 
 For each Iconic Bubble Icons product icon it z-buffers the top-down (XY)
 height map of the printed mesh, then writes:
@@ -38,11 +38,22 @@ ICONS = [
     ('Boat',              'icons shapes.3mf',   '34'),
     ('Car',               'icons shapes.3mf',   '26'),
     ('Dinosaur',          'icons shapes.3mf',   '20'),
-    ('Princess Tiara',    'icons princess.3mf', '4'),
-    ('Cinderella Shoe',   'icons princess.3mf', '10'),
-    ('Princess Carriage', 'icons princess.3mf', '2'),
-    ('Princess Castle',   'icons princess.3mf', '6'),
-    ('Princess Wand',     'icons princess.3mf', '8'),
+    ('Princess Tiara',    'icon ThePrincessSet.3mf', '4'),
+    ('Cinderella Shoe',   'icon ThePrincessSet.3mf', '10'),
+    ('Princess Carriage', 'icon ThePrincessSet.3mf', '2'),
+    ('Princess Castle',   'icon ThePrincessSet.3mf', '6'),
+    ('Princess Wand',     'icon ThePrincessSet.3mf', '8'),
+    ('Whale',             'icon Ocean.3mf',     '2'),
+    ('Crab',              'icon Ocean.3mf',     '4'),
+    ('Wave',              'icon Ocean.3mf',     '6'),
+    ('Double Wave',       'icon Ocean.3mf',     '8'),
+    ('Octopus',           'icon Ocean.3mf',     '10'),
+    ('Submarine',         'icon Ocean.3mf',     '12'),
+    ('Golf Ball',         'icon Golf.3mf',      '2'),
+    ('Golf Cart',         'icon Golf.3mf',      '4'),
+    ('Golf Club',         'icon Golf.3mf',      '6'),
+    ('Golf Flag',         'icon Golf.3mf',      '8'),    # the single-piece flag, not the 3-piece print
+    ('Golf Tee',          'icon Golf.3mf',      '16'),
 ]
 
 GRID   = 240    # raster size of the longer side, pixels
